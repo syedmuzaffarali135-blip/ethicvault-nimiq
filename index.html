@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F2348">
+<title>EthicVault – Ethical Micro-Savings & Giving</title>
+<script src="https://cdn.jsdelivr.net/npm/@nimiq/mini-app-sdk@latest/dist/standalone.umd.js"></script>
+<style>
+:root{
+  --navy:#1F2348; --navy-d:#161A38; --navy-l:#2A2F5E; --card:#252A55;
+  --green:#10B981; --green-d:#0B8F65; --gold:#FFAE00; --text:#F3F4FA; --muted:#9AA0C8;
+  --line:rgba(255,255,255,.09); --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{max-width:100%;overflow-x:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:radial-gradient(1200px 600px at 50% -10%,#2B3170 0%,var(--navy) 45%,var(--navy-d) 100%) fixed;
+  color:var(--text);min-height:100vh;line-height:1.45;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+.app{width:100%;max-width:480px;margin:0 auto;padding:16px 16px 40px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 18px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{
+  width:42px;height:42px;border-radius:13px;flex:0 0 auto;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--green-d));
+  box-shadow:0 6px 18px rgba(16,185,129,.35);font-size:21px;
+}
+.brand h1{font-size:19px;font-weight:800;letter-spacing:.2px}
+.brand h1 span{color:var(--gold)}
+.brand p{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wallet-btn{
+  flex:0 0 auto;border:1px solid var(--gold);background:rgba(255,174,0,.1);color:var(--gold);
+  font-weight:700;font-size:12.5px;padding:10px 14px;border-radius:999px;cursor:pointer;
+  min-height:44px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:.2s;
+}
+.wallet-btn:active{transform:scale(.97)}
+.wallet-btn.on{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.12)}
+.tabs{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border-radius:16px;
+  background:rgba(0,0,0,.28);border:1px solid var(--line);margin-bottom:16px;
+}
+.tab{
+  border:0;background:transparent;color:var(--muted);font-weight:700;font-size:14px;
+  padding:13px 8px;border-radius:12px;cursor:pointer;min-height:48px;transition:.2s;
+}
+.tab.active{background:linear-gradient(135deg,var(--green),var(--green-d));color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.3)}
+.panel{display:none;animation:fade .35s ease}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{
+  background:linear-gradient(160deg,var(--card),rgba(37,42,85,.7));border:1px solid var(--line);
+  border-radius:var(--radius);padding:20px;box-shadow:0 12px 32px rgba(0,0,0,.28);
+}
+label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;font-weight:600}
+select{
+  width:100%;appearance:none;-webkit-appearance:none;background:var(--navy-d) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' fill='none' stroke='%23FFAE00' stroke-width='2'%3E%3Cpath d='M1 1l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 16px center;
+  color:var(--text);border:1px solid var(--line);border-radius:14px;padding:15px 44px 15px 16px;
+  font-size:16px;font-weight:600;min-height:52px;cursor:pointer;
+}
+select:focus{outline:2px solid var(--green);outline-offset:1px}
+.big{text-align:center;margin:22px 0 6px}
+.big .amt{font-size:46px;font-weight:800;letter-spacing:-1px;color:var(--green)}
+.big .amt small{font-size:18px;color:var(--gold);font-weight:700;margin-left:6px}
+.big .of{color:var(--muted);font-size:13px}
+.bar{height:16px;border-radius:999px;background:rgba(0,0,0,.35);overflow:hidden;margin:16px 0 10px;border:1px solid var(--line)}
+.fill{
+  height:100%;width:0;border-radius:999px;transition:width .7s cubic-bezier(.2,.9,.3,1);
+  background:linear-gradient(90deg,var(--green-d),var(--green),#6EE7B7);box-shadow:0 0 14px rgba(16,185,129,.6);
+}
+.fill.done{background:linear-gradient(90deg,var(--gold),#FFD36B)}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);gap:8px}
+.meta b{color:var(--text)}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0 14px}
+.actions.two{grid-template-columns:1fr 1fr}
+.btn{
+  border:0;cursor:pointer;font-weight:800;font-size:16px;color:#fff;min-height:58px;border-radius:16px;
+  background:linear-gradient(135deg,var(--green),var(--green-d));box-shadow:0 6px 16px rgba(16,185,129,.28);
+  transition:.15s;padding:12px 6px;
+}
+.btn.gold{background:linear-gradient(135deg,var(--gold),#E69500);color:#1F2348;box-shadow:0 6px 16px rgba(255,174,0,.25)}
+.btn:active:not(:disabled){transform:scale(.96)}
+.btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;filter:grayscale(.4)}
+.hint{text-align:center;font-size:12.5px;color:var(--gold);min-height:18px;margin-bottom:6px}
+.note{font-size:13.5px;color:var(--muted);text-align:center;padding:4px 6px 0}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 4px}
+.stat{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:16px 10px;text-align:center}
+.stat .n{font-size:26px;font-weight:800;color:var(--gold)}
+.stat .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+.live{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:var(--green);margin-top:14px;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.7)}70%{box-shadow:0 0 0 9px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+.cause-desc{font-size:13.5px;color:var(--muted);margin-top:12px;text-align:center}
+.badge{
+  display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;margin-top:12px;
+  padding:12px 14px;border-radius:14px;font-size:12.5px;font-weight:700;color:var(--green);
+  background:rgba(16,185,129,.1);border:1px dashed rgba(16,185,129,.5);
+}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+.pill{font-size:11.5px;color:var(--muted);border:1px solid var(--line);padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.2)}
+.mode{text-align:center;font-size:11px;color:var(--muted);margin-top:18px}
+.overlay{
+  position:fixed;inset:0;background:rgba(10,12,30,.78);backdrop-filter:blur(6px);display:none;
+  align-items:center;justify-content:center;padding:20px;z-index:50;
+}
+.overlay.show{display:flex}
+.modal{
+  width:100%;max-width:380px;background:linear-gradient(160deg,#2B3170,var(--navy));
+  border:1px solid rgba(16,185,129,.4);border-radius:24px;padding:28px 22px 22px;text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,.55);animation:pop .4s cubic-bezier(.2,1.2,.3,1);
+}
+@keyframes pop{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}
+.check{
+  width:72px;height:72px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--green-d));box-shadow:0 0 0 8px rgba(16,185,129,.15),0 8px 24px rgba(16,185,129,.4);
+}
+.check svg{width:36px;height:36px;stroke:#fff;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:draw .6s .2s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.modal h2{font-size:21px;margin-bottom:4px}
+.modal .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+.sum{background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:14px;padding:6px 14px;text-align:left;margin-bottom:14px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:13.5px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row span{color:var(--muted)}
+.row b{text-align:right;word-break:break-all}
+.row b.g{color:var(--green)}
+.motto{font-style:italic;color:var(--gold);font-size:13.5px;margin-bottom:18px;padding:0 6px}
+.modal .btn{width:100%}
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(30px);opacity:0;
+  background:#3a1f2b;color:#ffc9d4;border:1px solid #ff6b8a;padding:12px 18px;border-radius:12px;
+  font-size:13px;z-index:60;transition:.3s;max-width:90%;text-align:center;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.toast.ok{background:#0f3a2d;color:#b5f5de;border-color:var(--green)}
+@media(max-width:360px){.big .amt{font-size:38px}.brand p{display:none}.btn{font-size:14px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">🌿</div>
+      <div>
+        <h1>Ethic<span>Vault</span></h1>
+        <p>Ethical Micro-Savings &amp; Giving</p>
+      </div>
+    </div>
+    <button class="wallet-btn" id="walletBtn">Connect Wallet</button>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="vault" role="tab">💰 Savings Vault</button>
+    <button class="tab" data-tab="impact" role="tab">🤝 Community Impact</button>
+  </div>
+
+  <!-- TAB 1 -->
+  <section class="panel active" id="panel-vault">
+    <div class="card">
+      <label for="goalSelect">Active Goal</label>
+      <select id="goalSelect"></select>
+
+      <div class="big">
+        <div class="amt"><span id="savedAmt">0</span><small>NIM</small></div>
+        <div class="of">saved of <b id="targetAmt">100</b> NIM goal</div>
+      </div>
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <div class="meta"><span><b id="pct">0%</b> complete</span><span><b id="remain">0</b> NIM to go</span></div>
+
+      <div class="actions">
+        <button class="btn dep" data-amt="1" disabled>+1 NIM</button>
+        <button class="btn dep" data-amt="5" disabled>+5 NIM</button>
+        <button class="btn dep" data-amt="10" disabled>+10 NIM</button>
+      </div>
+      <div class="hint" id="vaultHint">Connect your wallet to start saving</div>
+      <p class="note">Consistent micro-deposits compound into lasting freedom. Interest-free by design.</p>
+      <div class="pill-row">
+        <span class="pill">🚫 Zero interest</span><span class="pill">🔒 You stay in control</span><span class="pill">✅ Halal-aligned</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2 -->
+  <section class="panel" id="panel-impact">
+    <div class="card">
+      <label for="causeSelect">Verified Cause</label>
+      <select id="causeSelect"></select>
+      <p class="cause-desc" id="causeDesc"></p>
+
+      <div class="stats">
+        <div class="stat"><div class="n" id="totalGiven">0</div><div class="l">NIM contributed</div></div>
+        <div class="stat"><div class="n" id="benef">0</div><div class="l">Beneficiaries supported</div></div>
+      </div>
+      <div class="live"><span class="dot"></span> Live community counter</div>
+
+      <div class="actions two">
+        <button class="btn gold give" data-amt="1" disabled>Give 1 NIM</button>
+        <button class="btn gold give" data-amt="5" disabled>Give 5 NIM</button>
+      </div>
+      <div class="hint" id="giveHint">Connect your wallet to start giving</div>
+      <div class="badge">🛡️ Zero platform fees • Direct peer-to-cause transfers</div>
+      <p class="note" style="margin-top:14px">100% of every NIM reaches the cause. Your contribution: <b id="myGiven" style="color:var(--gold)">0</b> NIM</p>
+    </div>
+  </section>
+
+  <div class="mode" id="modeInfo"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <h2 id="mTitle">Success</h2>
+    <p class="sub" id="mSub"></p>
+    <div class="sum">
+      <div class="row"><span>Amount</span><b class="g" id="mAmt"></b></div>
+      <div class="row"><span id="mTargetLbl">Target</span><b id="mTarget"></b></div>
+      <div class="row"><span>Mode</span><b id="mMode"></b></div>
+      <div class="row"><span>Tx Hash</span><b id="mHash" style="font-size:11.5px"></b></div>
+    </div>
+    <p class="motto">“Small consistent deeds build meaningful futures.”</p>
+    <button class="btn" id="mClose">Continue ✨</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  // ---------- Config ----------
+  const KEY = 'ethicvault_v1';
+  const LUNA = 100000; // 1 NIM = 100,000 luna
+  // Replace with real project addresses before production launch.
+  const VAULT_ADDRESS = 'NQ07 0000 0000 0000 0000 0000 0000 0000 0000';
+  const GOALS = {
+    emergency: {name:'Emergency Cushion', target:100, start:45},
+    equipment: {name:'Equipment & Tools', target:250, start:0},
+    life:      {name:'Life Milestone Journey', target:500, start:0}
+  };
+  const CAUSES = {
+    meals: {name:'Daily Meals Relief', unit:5, noun:'meals', desc:'Verified kitchens provide hot, nutritious meals to families in need.', total:1284, benef:256, address:'NQ12 MEAL 0000 0000 0000 0000 0000 0000 0000'},
+    tech:  {name:'Student Tech Grants', unit:25, noun:'students', desc:'Laptops and learning tools for deserving students around the world.', total:2350, benef:94, address:'NQ34 TECH 0000 0000 0000 0000 0000 0000 0000'}
+  };
+  const DEMO_ADDR = 'NQ44 DEMO VAULT 9K...';
+
+  // ---------- State ----------
+  const $ = id => document.getElementById(id);
+  let state = load();
+  function defaults(){
+    const saved = {}; Object.keys(GOALS).forEach(k => saved[k] = GOALS[k].start);
+    const given = {}; Object.keys(CAUSES).forEach(k => given[k] = 0);
+    return {goal:'emergency', cause:'meals', saved, given, tab:'vault', wallet:null};
+  }
+  function load(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(KEY));
+      if(raw && raw.saved && raw.given) return Object.assign(defaults(), raw);
+    }catch(e){}
+    return defaults();
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+  // ---------- Environment / Wallet ----------
+  const live = () => typeof window.nimiq !== 'undefined' && window.nimiq !== null;
+  let provider = null;
+
+  function toast(msg, ok){
+    const t = $('toast'); t.textContent = msg; t.className = 'toast show' + (ok ? ' ok' : '');
+    clearTimeout(toast.t); toast.t = setTimeout(() => t.className = 'toast', 2800);
+  }
+  const short = a => a && a.length > 22 ? a.slice(0, 14) + '…' + a.slice(-4) : a;
+
+  async function connect(){
+    if(state.wallet){ // tap again to disconnect
+      state.wallet = null; save(); render(); toast('Wallet disconnected', true); return;
+    }
+    if(live()){
+      try{
+        provider = window.nimiq;
+        let addr = null;
+        if(typeof provider.listAccounts === 'function'){
+          const acc = await provider.listAccounts();
+          addr = Array.isArray(acc) ? (acc[0] && (acc[0].address || acc[0]) ) : (acc && acc.address);
+        } else if(typeof provider.connect === 'function'){
+          const r = await provider.connect();
+          addr = r && (r.address || (r.accounts && r.accounts[0]));
+        }
+        if(!addr) throw new Error('No account returned');
+        state.wallet = {address: String(addr), demo:false};
+      }catch(e){ toast('Wallet connection failed: ' + (e.message || 'cancelled')); return; }
+    } else {
+      state.wallet = {address: DEMO_ADDR, demo:true};
+    }
+    save(); render(); toast('Wallet connected', true);
+  }
+
+  async function pay(recipient, nim, memo){
+    const hash = () => Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2,'0')).join('');
+    if(state.wallet && !state.wallet.demo && live()){
+      const p = window.nimiq, value = Math.round(nim * LUNA);
+      let res;
+      if(typeof p.sendBasicTransaction === 'function')
+        res = await p.sendBasicTransaction({recipient: recipient.replace(/\s/g,' '), value, data: memo});
+      else if(typeof p.requestPayment === 'function')
+        res = await p.requestPayment({recipient, value, data: memo});
+      else throw new Error('Payment method unavailable');
+      const h = typeof res === 'string' ? res : (res && (res.hash || res.transactionHash)) || hash();
+      return {hash:h, demo:false};
+    }
+    await new Promise(r => setTimeout(r, 650)); // simulated network latency
+    return {hash:hash(), demo:true};
+  }
+
+  // ---------- Rendering ----------
+  function fillSelect(sel, obj, cur){
+    sel.innerHTML = '';
+    Object.keys(obj).forEach(k => {
+      const o = document.createElement('option'); o.value = k; o.textContent = obj[k].name;
+      if(k === cur) o.selected = true; sel.appendChild(o);
+    });
+  }
+  function render(){
+    const connected = !!state.wallet;
+    const wb = $('walletBtn');
+    wb.textContent = connected ? short(state.wallet.address) : 'Connect Wallet';
+    wb.classList.toggle('on', connected);
+    $('modeInfo').textContent = live() ? '● Live mode · Nimiq Pay detected' : '● Simulation mode · demo wallet, no real funds';
+
+    // Vault
+    const g = GOALS[state.goal], saved = state.saved[state.goal];
+    const pct = Math.min(100, Math.round(saved / g.target * 100));
+    $('savedAmt').textContent = saved;
+    $('targetAmt').textContent = g.target;
+    $('pct').textContent = pct + '%';
+    $('remain').textContent = Math.max(0, g.target - saved);
+    const f = $('fill'); f.style.width = pct + '%'; f.classList.toggle('done', pct >= 100);
+    document.querySelectorAll('.dep').forEach(b => b.disabled = !connected);
+    $('vaultHint').textContent = !connected ? 'Connect your wallet to start saving'
+      : pct >= 100 ? '🎉 Goal reached – you can keep building!' : 'Wallet ready · choose a deposit amount';
+
+    // Impact
+    const c = CAUSES[state.cause];
+    const total = c.total + state.given[state.cause];
+    const benef = c.benef + Math.floor(state.given[state.cause] / c.unit);
+    $('causeDesc').textContent = c.desc;
+    $('totalGiven').textContent = total.toLocaleString('en-US');
+    $('benef').textContent = benef.toLocaleString('en-US');
+    $('myGiven').textContent = state.given[state.cause];
+    document.querySelectorAll('.give').forEach(b => b.disabled = !connected);
+    $('giveHint').textContent = connected ? 'Wallet ready · every NIM goes directly to the cause' : 'Connect your wallet to start giving';
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === state.tab));
+    $('panel-vault').classList.toggle('active', state.tab === 'vault');
+    $('panel-impact').classList.toggle('active', state.tab === 'impact');
+  }
+
+  // ---------- Modal ----------
+  function showModal(o){
+    $('mTitle').textContent = o.title; $('mSub').textContent = o.sub;
+    $('mAmt').textContent = o.amount; $('mTargetLbl').textContent = o.label;
+    $('mTarget').textContent = o.target;
+    $('mMode').textContent = o.demo ? 'Simulation' : 'Nimiq Pay (live)';
+    $('mHash').textContent = o.hash.slice(0, 10) + '…' + o.hash.slice(-8);
+    $('overlay').classList.add('show');
+  }
+  $('mClose').addEventListener('click', () => $('overlay').classList.remove('show'));
+  $('overlay').addEventListener('click', e => { if(e.target.id === 'overlay') $('overlay').classList.remove('show'); });
+
+  // ---------- Actions ----------
+  let busy = false;
+  async function act(btn, amt, kind){
+    if(busy || !state.wallet) return;
+    busy = true; const old = btn.textContent; btn.textContent = '…'; btn.disabled = true;
+    try{
+      if(kind === 'save'){
+        const g = GOALS[state.goal];
+        const r = await pay(VAULT_ADDRESS, amt, 'EthicVault:save:' + state.goal);
+        state.saved[state.goal] += amt; save(); render();
+        showModal({title:'Deposit Successful', sub:'Your savings are growing, interest-free.', amount:'+' + amt + ' NIM',
+          label:'Goal', target:g.name, hash:r.hash, demo:r.demo});
+      } else {
+        const c = CAUSES[state.cause];
+        const r = await pay(c.address, amt, 'EthicVault:give:' + state.cause);
+        state.given[state.cause] += amt; save(); render();
+        showModal({title:'Gift Delivered', sub:'100% went directly to the cause.', amount:'+' + amt + ' NIM',
+          label:'Cause', target:c.name, hash:r.hash, demo:r.demo});
+      }
+    }catch(e){
+      toast('Transaction not completed: ' + (e && e.message ? e.message : 'cancelled'));
+    }finally{
+      busy = false; btn.textContent = old; render();
+    }
+  }
+
+  // ---------- Events ----------
+  $('walletBtn').addEventListener('click', connect);
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { state.tab = t.dataset.tab; save(); render(); }));
+  $('goalSelect').addEventListener('change', e => { state.goal = e.target.value; save(); render(); });
+  $('causeSelect').addEventListener('change', e => { state.cause = e.target.value; save(); render(); });
+  document.querySelectorAll('.dep').forEach(b => b.addEventListener('click', () => act(b, +b.dataset.amt, 'save')));
+  document.querySelectorAll('.give').forEach(b => b.addEventListener('click', () => act(b, +b.dataset.amt, 'give')));
+
+  // ---------- Init ----------
+  fillSelect($('goalSelect'), GOALS, state.goal);
+  fillSelect($('causeSelect'), CAUSES, state.cause);
+  if(state.wallet && !state.wallet.demo && !live()) state.wallet = null; // stale live session
+  render();
+})();
+</script>
+</body>
+</html>
